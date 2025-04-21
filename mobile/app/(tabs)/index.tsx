@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, View, Text } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
   return (
+
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
@@ -50,6 +51,12 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
+
+      {/* test  */}
+      <View className="w-10 h-10 bg-green-500" />
+      <Text className='font-4xl text-blue-500 p-2 font-bold'>Test native wind</Text>
+      {/* test  */}
+
     </ParallaxScrollView>
   );
 }
