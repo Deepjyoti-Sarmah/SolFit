@@ -1,0 +1,5 @@
+module github.com/Deepjyoti-Sarmah/sol-kit-backend
+
+go 1.23.0
+
+require github.com/caarlos0/env/v11 v11.3.1 // indirect
