@@ -32,6 +32,12 @@ func NewPostgresDb(conf *config.Config) (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("failed to create connection pool: %w", err)
 	}
 
+	poolConfig.MaxConns = conf.DatabaseMaxConn
+	poolConfig.MinConns = conf.DatabaseMinConn
+	poolConfig.MaxConnLifetime = conf.DatabaseMaxConnLifetime * time.Minute
+	poolConfig.MaxConnIdleTime = conf.DatabaseMaxConnIdletime * time.Minute
+	poolConfig.HealthCheckPeriod = conf.DatabaseHealthCheckPeriod * time.Minute
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -40,4 +46,32 @@ func NewPostgresDb(conf *config.Config) (*pgxpool.Pool, error) {
 	}
 
 	return pool, nil
+}
+
+func CreateDatabase(conf *config.Config) error {
+	baseConnString := conf.DatabaseUrl()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	basePool, err := pgxpool.New(ctx, baseConnString)
+	if err != nil {
+		return fmt.Errorf("failed to connect to postgres database: %w", err)
+	}
+	defer basePool.Close()
+
+	var exists bool
+	err = basePool.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)", conf.DatabaseName).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("failed to check if database exists: %w", err)
+	}
+
+	if !exists {
+		_, err = basePool.Exec(ctx, fmt.Sprintf("CREATE DATABASE %s", conf.DatabaseName))
+		if err != nil {
+			return fmt.Errorf("failed to createe database: %w", err)
+		}
+	}
+
+	return nil
 }
